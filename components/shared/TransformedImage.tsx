@@ -1,19 +1,35 @@
+'use client'
+
 import React from 'react'
 import { Button } from '../ui/button'
 import Image from 'next/image'
-import { CldImage } from 'next-cloudinary'
-import { getImageSize, dataUrl, debounce } from '@/lib/utils'
+import { CldImage, getCldImageUrl } from 'next-cloudinary'
+import { getImageSize, dataUrl, debounce, download } from '@/lib/utils'
 import { PlaceholderValue } from 'next/dist/shared/lib/get-img-props'
 
 const TransformedImage = ({
   image, type, title, transformationConfig, isTransforming, setIsTransforming, hasDownload = false
 }: TransformedImageProps) => {
-  const downloadHander = () => {}
+  const downloadHander = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+
+    download(
+      getCldImageUrl({
+        width: image?.width,
+        height: image?.height,
+        src: image?.publicId,
+        ...transformationConfig,
+
+      }),
+      title
+    )
+  };
+
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex-between'>
         <h3 className='h3-bold text-dark-600'>
-          Tranformed
+          Transformed
         </h3>
 
         {hasDownload && (
