@@ -1,4 +1,9 @@
-'use client';
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { CldImage } from "next-cloudinary";
 
 import {
   Pagination,
@@ -6,40 +11,40 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { transformationTypes } from "@/constants";
 import { IImage } from "@/lib/database/models/image.model";
-import { useRouter, useSearchParams } from "next/navigation";
-
-import React from 'react'
-import { Button } from "../ui/button";
 import { formUrlQuery } from "@/lib/utils";
+
+import { Button } from "../ui/button";
+
 import Search from "./Search";
-import Card from "./Card";
 
 const Collection = ({
   hasSearch = false,
   images,
   totalPages = 1,
-  page
+  page,
 }: {
-  hasSearch?: boolean,
-  images: IImage[],
-  totalPages?: number
-  page: number
+  images: IImage[];
+  totalPages?: number;
+  page: number;
+  hasSearch?: boolean;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // PAGINATION HANDLER
   const onPageChange = (action: string) => {
-    const pageValue = action === 'next' ? Number(page) + 1 : Number(page) - 1;
+    const pageValue = action === "next" ? Number(page) + 1 : Number(page) - 1;
 
     const newUrl = formUrlQuery({
       searchParams: searchParams.toString(),
-      key: 'page',
-      value: pageValue
-    })
+      key: "page",
+      value: pageValue,
+    });
 
-    router.push(newUrl, {scroll: false})
-  }
+    router.push(newUrl, { scroll: false });
+  };
 
   return (
     <>
@@ -50,37 +55,77 @@ const Collection = ({
 
       {images.length > 0 ? (
         <ul className="collection-list">
-          {images.map(image => (
-            <Card image={image} key={image._id} />
+          {images.map((image) => (
+            <Card image={image} key={image.title} />
           ))}
         </ul>
       ) : (
         <div className="collection-empty">
-          <p className="p-20-semibold">
-            Empty List
-          </p>
+          <p className="p-20-semibold">Empty List</p>
         </div>
       )}
 
       {totalPages > 1 && (
         <Pagination className="mt-10">
           <PaginationContent className="flex w-full">
-            <Button className="collection-btn" disabled={Number(page) <= 1} onClick={() => onPageChange('prev')}>
-              <PaginationPrevious className="hover:bg-transparent hover:text-white"/>
+            <Button
+              disabled={Number(page) <= 1}
+              className="collection-btn"
+              onClick={() => onPageChange("prev")}
+            >
+              <PaginationPrevious className="hover:bg-transparent hover:text-white" />
             </Button>
 
-            <p className="flex-center p-16-medium flex-1 w-fit">
-              {page} | {totalPages}
+            <p className="flex-center p-16-medium w-fit flex-1">
+              {page} / {totalPages}
             </p>
 
-            <Button className="button w-32 bg-purple-gradient bg-cover text-white" onClick={() => onPageChange('next')} disabled={Number(page) >= totalPages}>
-              <PaginationNext className="hover:bg-transparent hover:text-white"/>
+            <Button
+              className="button w-32 bg-purple-gradient bg-cover text-white"
+              onClick={() => onPageChange("next")}
+              disabled={Number(page) >= totalPages}
+            >
+              <PaginationNext className="hover:bg-transparent hover:text-white" />
             </Button>
           </PaginationContent>
         </Pagination>
       )}
     </>
-  )
-}
+  );
+};
 
-export default Collection
+const Card = ({ image }: { image: IImage }) => {
+  return (
+    <li>
+      <Link href={`/transformations/${image._id}`} className="collection-card">
+        <CldImage
+          src={image.publicId}
+          alt={image.title}
+          width={image.width}
+          height={image.height}
+          {...image.config}
+          loading="lazy"
+          className="h-52 w-full rounded-[10px] object-cover"
+          sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
+        />
+        <div className="flex-between">
+          <p className="p-20-semibold mr-3 line-clamp-1 text-dark-600">
+            {image.title}
+          </p>
+          <Image
+            src={`/assets/icons/${
+              transformationTypes[
+                image.transformationType as TransformationTypeKey
+              ].icon
+            }`}
+            alt={image.title}
+            width={24}
+            height={24}
+          />
+        </div>
+      </Link>
+    </li>
+  );
+};
+
+export default Collection;

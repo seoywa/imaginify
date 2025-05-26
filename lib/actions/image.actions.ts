@@ -12,7 +12,7 @@ const populateUser = (query: any) =>
   query.populate({
     path: "author",
     model: User,
-    select: "_id firstName lastName",
+    select: "_id firstName lastName clerkId",
   });
 
 export const addImage = async ({ image, userId, path }: AddImageParams) => {
@@ -139,14 +139,36 @@ export const getAllImages = async ({
 
     const totalImages = await Image.find(query).countDocuments();
 
-    const savedImages = await Image.find().countDocuments;
-
     return {
-      data: JSON.parse(JSON.stringify(totalImages)),
+      data: JSON.parse(JSON.stringify(images)),
       totalPages: Math.ceil(totalImages / limit),
-      savedImages,
     };
   } catch (error) {
     handleError(error);
   }
 };
+
+export const getUserImages = async ({
+  limit = 9, page = 1, userId
+}: {
+  limit?: number, page: number, userId: string
+}) => {
+  try {
+    await connectToDatabase();
+
+    const skipAmount = (Number(page) - 1) * limit;
+
+    const images = await populateUser(Image.find({ author: userId })).sort({ updatedAt: - 1}).skip(skipAmount).limit(limit);
+
+    const totalImages = await Image.find({ author: userId }).countDocuments();
+
+    return {
+      data: JSON.parse(JSON.stringify(images)),
+      totalPages: Math.ceil(totalImages / limit)
+    }
+
+  } catch (error) {
+    handleError(error)
+  }
+
+}
