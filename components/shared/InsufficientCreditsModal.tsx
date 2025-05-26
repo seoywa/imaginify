@@ -37,7 +37,7 @@ export const InsufficientCreditsModal = () => {
           <Image src={'/assets/images/stacked-coins.png'} alt="credits" width={462} height={122} />
 
           <AlertDialogTitle className="text-dark-600 p-24-bold">
-            Oops... Looks like you've run out of free credits!
+            Oops... Looks like you&apos;ve run out of free credits!
           </AlertDialogTitle>
 
           <AlertDialogDescription className="p-16-regular py-3">Grab more credits</AlertDialogDescription>

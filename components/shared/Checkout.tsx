@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast'
 import { checkoutCredits } from '@/lib/actions/transaction.actions';
 import React, { useEffect } from 'react'
 import { Button } from '../ui/button';
+import { loadStripe } from "@stripe/stripe-js";
 
 const Checkout = ({ plan, amount, buyerId, credits}: {
   plan: string,
@@ -12,6 +13,10 @@ const Checkout = ({ plan, amount, buyerId, credits}: {
   credits: number 
 }) => {
   const {toast} = useToast();
+
+  useEffect(() => {
+    loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+  }, [])
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
